@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { useState, useEffect } from 'react';
+import ChatBot from './components/ChatBot';
 
 export default function App() {
   const phoneNumber = "+639276623221";
@@ -585,6 +586,7 @@ export default function App() {
           </div>
         </div>
       </footer>
+      <ChatBot />
     </div>
   );
 }
