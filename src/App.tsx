@@ -17,13 +17,23 @@ import {
   Mail,
   Check,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  ShoppingBag,
+  Plus,
+  Minus,
+  Trash2,
+  ShoppingCart
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { useState, useEffect } from 'react';
 import ChatBot from './components/ChatBot';
+import { CartProvider, useCart, Product } from './context/CartContext';
+import CartDrawer from './components/CartDrawer';
+import PaymentPortal from './components/PaymentPortal';
 
-export default function App() {
+function AppContent() {
+  const { addToCart, totalItems, setIsCartOpen } = useCart();
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const phoneNumber = "+639276623221";
   const whatsappNumber = "639276623221";
   const mapsLink = "https://maps.app.goo.gl/XtHqjL9h8c94teaL7";
@@ -87,14 +97,37 @@ export default function App() {
             ))}
           </div>
 
-          <motion.a 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            href={`tel:${phoneNumber}`}
-            className="bg-stone-900 text-white px-7 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-xl shadow-stone-900/20 hover:bg-gold"
-          >
-            Order Now
-          </motion.a>
+          <div className="flex items-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 text-stone-900 hover:bg-gold hover:text-white transition-all group"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <AnimatePresence>
+                {totalItems > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg"
+                  >
+                    {totalItems}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+
+            <motion.a 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              href={`tel:${phoneNumber}`}
+              className="bg-stone-900 text-white px-7 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-xl shadow-stone-900/20 hover:bg-gold"
+            >
+              Order Now
+            </motion.a>
+          </div>
         </div>
       </nav>
 
@@ -258,41 +291,68 @@ export default function App() {
           <div className="grid md:grid-cols-3 gap-10">
             {[
               {
+                id: 'custom-cake',
                 title: "Custom Celebration Cakes",
                 desc: "Bespoke designs for weddings, birthdays, and corporate milestones.",
-                img: "https://scontent-man2-1.xx.fbcdn.net/v/t39.30808-6/655761682_1527504972715529_8656397089554994921_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=106&ccb=1-7&_nc_sid=13d280&_nc_ohc=x81kza_NtI4Q7kNvwGEfsm9&_nc_oc=AdoCNrPFUDR0MBJ_Ye-0kfXFeNNBP5ap9s84lIyg7IYag1gols_1jeLRLHr7seX2QzE&_nc_zt=23&_nc_ht=scontent-man2-1.xx&_nc_gid=y_W6abTURiiUZhQ4r2-tDA&_nc_ss=7a32e&oh=00_Afz94P7Kt0jz8cJ5tP1KrfKhPBQ4cWqtF8YBXWPMcI9TsQ&oe=69CAA370"
+                price: 2500,
+                img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=800&auto=format&fit=crop"
               },
               {
+                id: 'artisanal-pastries',
                 title: "Artisanal Pastries",
                 desc: "Daily fresh-baked croissants, tarts, and artisanal breads.",
-                img: "https://scontent-man2-1.xx.fbcdn.net/v/t51.82787-15/655637709_18086975327241067_4254442250254540033_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=QsK6SUxiRkoQ7kNvwFSVtX8&_nc_oc=AdqGvoGMMCgcK-G_xZaIcC9crn4yOy4lZk_bX8zHS2N6g6-9aLIiS5P7JukH1YO-L58&_nc_zt=23&_nc_ht=scontent-man2-1.xx&_nc_gid=y_W6abTURiiUZhQ4r2-tDA&_nc_ss=7a32e&oh=00_AfxaYSYim2EPkgKPl08nFdYi3dem9XVMfHc5H5_e3k6tUA&oe=69CABC0E"
+                price: 1200,
+                img: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=800&auto=format&fit=crop"
               },
               {
+                id: 'gourmet-cupcakes',
                 title: "Gourmet Cupcakes",
                 desc: "Curated spreads featuring a variety of mini-treats for your events.",
-                img: "https://scontent-man2-1.xx.fbcdn.net/v/t51.82787-15/655762747_18086851970241067_6641327253305774993_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=pyNH4xcLdLIQ7kNvwHQhGU6&_nc_oc=AdqRI02NDQqWhT1L1wgJcI6uTuF_nvl1Cua0CF3Zdc0XpJOEp75rRJ3_lRJPbzH3qNg&_nc_zt=23&_nc_ht=scontent-man2-1.xx&_nc_gid=y_W6abTURiiUZhQ4r2-tDA&_nc_ss=7a32e&oh=00_AfyEPGV0EZlY89znxufZPelWA-PUxsG7V0Q23v4w3iMx8Q&oe=69CAAA42"
+                price: 850,
+                img: "https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?q=80&w=800&auto=format&fit=crop"
               }
             ].map((item, idx) => (
               <motion.div 
                 key={idx}
                 {...fadeIn}
                 transition={{ delay: idx * 0.1 }}
-                className="group cursor-pointer"
+                className="group cursor-pointer bg-stone-50 rounded-[2.5rem] p-4 border border-stone-100 hover:shadow-2xl hover:shadow-stone-200/50 transition-all duration-500"
               >
-                <div className="relative h-[550px] overflow-hidden rounded-[2rem] mb-8">
+                <div className="relative h-[400px] overflow-hidden rounded-[2rem] mb-8">
                   <img 
                     src={item.img} 
                     alt={item.title}
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-stone-900/90 via-stone-900/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-                  <div className="absolute bottom-12 left-10 right-10">
-                    <h3 className="text-2xl font-bold text-white mb-3">{item.title}</h3>
-                    <p className="text-stone-300 text-sm leading-relaxed opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-4 group-hover:translate-y-0">
-                      {item.desc}
-                    </p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute top-6 right-6">
+                    <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg">
+                      <span className="text-stone-900 font-black text-sm">₱{item.price.toLocaleString()}</span>
+                    </div>
                   </div>
+                </div>
+                
+                <div className="px-4 pb-4">
+                  <h3 className="text-2xl font-bold text-stone-900 mb-3">{item.title}</h3>
+                  <p className="text-stone-500 text-sm leading-relaxed mb-8">
+                    {item.desc}
+                  </p>
+                  <motion.button 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => addToCart({
+                      id: item.id,
+                      title: item.title,
+                      description: item.desc,
+                      price: item.price,
+                      image: item.img
+                    })}
+                    className="w-full bg-stone-900 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 group-hover:bg-gold transition-colors"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    Add to Cart
+                  </motion.button>
                 </div>
               </motion.div>
             ))}
@@ -312,7 +372,7 @@ export default function App() {
             >
               <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl">
                 <img 
-                  src="https://scontent-man2-1.xx.fbcdn.net/v/t51.82787-15/650218298_18085969805241067_8820547065086151189_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=105&ccb=1-7&_nc_sid=13d280&_nc_ohc=dxSDCT52Dg8Q7kNvwGj6cL0&_nc_oc=Ado6ktN6qXIGqGqjd-G1CQBxZYMM9nggDDsESIWPKHjbVH4EigP_8iJ-a5TTbxTYXck&_nc_zt=23&_nc_ht=scontent-man2-1.xx&_nc_gid=fAJgzgzK1rYMoa-qhS20uw&_nc_ss=7a32e&oh=00_AfwqpCqMjJVZ5aSvGfTslL8xhmm3JBh-mqyrxTmTf64seg&oe=69CAA0C7" 
+                  src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=800&auto=format&fit=crop" 
                   alt="Baker"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
@@ -408,12 +468,12 @@ export default function App() {
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             {[
-              "https://scontent-man2-1.xx.fbcdn.net/v/t39.30808-6/655761682_1527504972715529_8656397089554994921_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=106&ccb=1-7&_nc_sid=13d280&_nc_ohc=x81kza_NtI4Q7kNvwGEfsm9&_nc_oc=AdoCNrPFUDR0MBJ_Ye-0kfXFeNNBP5ap9s84lIyg7IYag1gols_1jeLRLHr7seX2QzE&_nc_zt=23&_nc_ht=scontent-man2-1.xx&_nc_gid=y_W6abTURiiUZhQ4r2-tDA&_nc_ss=7a32e&oh=00_Afz94P7Kt0jz8cJ5tP1KrfKhPBQ4cWqtF8YBXWPMcI9TsQ&oe=69CAA370",
-              "https://scontent-man2-1.xx.fbcdn.net/v/t51.82787-15/655637709_18086975327241067_4254442250254540033_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=QsK6SUxiRkoQ7kNvwFSVtX8&_nc_oc=AdqGvoGMMCgcK-G_xZaIcC9crn4yOy4lZk_bX8zHS2N6g6-9aLIiS5P7JukH1YO-L58&_nc_zt=23&_nc_ht=scontent-man2-1.xx&_nc_gid=y_W6abTURiiUZhQ4r2-tDA&_nc_ss=7a32e&oh=00_AfxaYSYim2EPkgKPl08nFdYi3dem9XVMfHc5H5_e3k6tUA&oe=69CABC0E",
-              "https://scontent-man2-1.xx.fbcdn.net/v/t51.82787-15/655762747_18086851970241067_6641327253305774993_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=pyNH4xcLdLIQ7kNvwHQhGU6&_nc_oc=AdqRI02NDQqWhT1L1wgJcI6uTuF_nvl1Cua0CF3Zdc0XpJOEp75rRJ3_lRJPbzH3qNg&_nc_zt=23&_nc_ht=scontent-man2-1.xx&_nc_gid=y_W6abTURiiUZhQ4r2-tDA&_nc_ss=7a32e&oh=00_AfyEPGV0EZlY89znxufZPelWA-PUxsG7V0Q23v4w3iMx8Q&oe=69CAAA42",
-              "https://scontent-man2-1.xx.fbcdn.net/v/t51.82787-15/650218298_18085969805241067_8820547065086151189_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=105&ccb=1-7&_nc_sid=13d280&_nc_ohc=dxSDCT52Dg8Q7kNvwGj6cL0&_nc_oc=Ado6ktN6qXIGqGqjd-G1CQBxZYMM9nggDDsESIWPKHjbVH4EigP_8iJ-a5TTbxTYXck&_nc_zt=23&_nc_ht=scontent-man2-1.xx&_nc_gid=fAJgzgzK1rYMoa-qhS20uw&_nc_ss=7a32e&oh=00_AfwqpCqMjJVZ5aSvGfTslL8xhmm3JBh-mqyrxTmTf64seg&oe=69CAA0C7",
-              "https://scontent-man2-1.xx.fbcdn.net/v/t51.82787-15/650247379_18085934939241067_9101943167828852459_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=100&ccb=1-7&_nc_sid=13d280&_nc_ohc=JfNNDRUfodgQ7kNvwHTdX7P&_nc_oc=AdqxwI6qoGEZbyM9Aa3mxma3iwwxsFKqyqtf1nA-x0tpheE5azIEsCKZ_pcATj_td-Q&_nc_zt=23&_nc_ht=scontent-man2-1.xx&_nc_gid=fAJgzgzK1rYMoa-qhS20uw&_nc_ss=7a3a8&oh=00_AfytuSg2sMIWmR4_PTb1QrG7CT7grG06l-XDoASwa0RxNA&oe=69CAB8D0",
-              "https://scontent-man2-1.xx.fbcdn.net/v/t51.82787-15/650219135_18085934948241067_6637476940036961820_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=crpR9XfD51kQ7kNvwEbB6sR&_nc_oc=AdpU5YaiHpU7ag521ogli65dipUz1pe_4-N2g6hz3dSxy2QY8eCfBrwXamxRmbKf_KA&_nc_zt=23&_nc_ht=scontent-man2-1.xx&_nc_gid=r9IHTPefG0y04NeF7gTRmA&_nc_ss=7a32e&oh=00_AfxR4_YIMIRajifFW51LcNF8dqCgeHmcJ75G9sg9miQSrA&oe=69CAD263"
+              "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=800&auto=format&fit=crop",
+              "https://images.unsplash.com/photo-1535141192574-5d4897c12636?q=80&w=800&auto=format&fit=crop",
+              "https://images.unsplash.com/photo-1562773226-1b0d0a7e55f9?q=80&w=800&auto=format&fit=crop",
+              "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?q=80&w=800&auto=format&fit=crop",
+              "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?q=80&w=800&auto=format&fit=crop",
+              "https://images.unsplash.com/photo-1519340333755-5672c7ec9cb2?q=80&w=800&auto=format&fit=crop"
             ].map((img, idx) => (
               <motion.div 
                 key={idx}
@@ -587,6 +647,16 @@ export default function App() {
         </div>
       </footer>
       <ChatBot />
+      <CartDrawer onCheckout={() => setIsPaymentOpen(true)} />
+      <PaymentPortal isOpen={isPaymentOpen} onClose={() => setIsPaymentOpen(false)} />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <CartProvider>
+      <AppContent />
+    </CartProvider>
   );
 }
